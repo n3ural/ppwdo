@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2D Ball Game</title>
+    <style>
+        #gameCanvas {
+            background-color: #f0f0f0;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const paddleWidth = 80;
+        const paddleHeight = 10;
+        const ballRadius = 10;
+        const paddleSpeed = 5;
+
+        let paddleX = (canvas.width - paddleWidth) / 2;
+        const paddleY = canvas.height - paddleHeight - 10;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height - paddleHeight - ballRadius - 10;
+        let ballSpeedX = 5;
+        let ballSpeedY = -5;
+
+        let rightPressed = false;
+        let leftPressed = false;
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Right" || e.key === "ArrowRight") {
+                rightPressed = true;
+            } else if (e.key === "Left" || e.key === "ArrowLeft") {
+                leftPressed = true;
+            }
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "Right" || e.key === "ArrowRight") {
+                rightPressed = false;
+            } else if (e.key === "Left" || e.key === "ArrowLeft") {
+                leftPressed = false;
+            }
+        });
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function gameOver() {
+            alert("Game Over!");
+            ballX = canvas.width / 2;
+            ballY = canvas.height - paddleHeight - ballRadius - 10;
+            ballSpeedX = 5;
+            ballSpeedY = -5;
+            document.location.reload(); // Reload the page when OK is clicked
+        }
+
+        function updateGameArea() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (rightPressed && paddleX < canvas.width - paddleWidth) {
+                paddleX += paddleSpeed;
+            } else if (leftPressed && paddleX > 0) {
+                paddleX -= paddleSpeed;
+            }
+
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Ball collision with walls
+            if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Ball collision with paddle
+            if (
+                ballY + ballRadius == paddleY &&
+                ballX > paddleX &&
+                ballX < paddleX + paddleWidth
+            ) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball collision with ceiling
+            if (ballY - ballRadius < 0) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Ball out of bounds (game over)
+            //  if (ballY + ballRadius > canvas.height) {
+            //      alert("Game Over!");
+            //      document.location.reload();
+            //  }
+
+            // Ball out of bounds (game over)
+            if (ballY + ballRadius > canvas.height) {
+                gameOver(); // Call the gameOver() function to display the alert and refresh the page
+            }
+
+            drawPaddle();
+            drawBall();
+            requestAnimationFrame(updateGameArea);
+        }
+
+        updateGameArea();
+    </script>
+</body>
+</html>
